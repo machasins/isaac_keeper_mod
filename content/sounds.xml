@@ -1,0 +1,11 @@
+<sounds root="sfx/">
+    <sound name="macha_vineBoom">
+        <sample weight="1" path="vine_boom.wav" />
+    </sound>
+    <sound name="macha_balls">
+        <sample weight="1" path="balls.wav"/>
+    </sound>
+    <sound name="macha_ballsMega">
+        <sample weight="1" path="balls_mega.wav"/>
+    </sound>
+</sounds>
