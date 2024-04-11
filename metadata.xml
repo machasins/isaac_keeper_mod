@@ -1,8 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <metadata>
-	<name>Keeper's Sack Shoutout</name>
-	<directory>Keeper's Sack Shoutout</directory>
-	<description/>
-	<version>1.0</version>
-	<visibility/>
-</metadata>
+    <name>Keeper's Balls</name>
+    <directory>keepers balls</directory>
+    <id>3218982229</id>
+    <description>[img=https://i.imgur.com/t3mr8c7.png][/img]
 
+This mod simply plays a vine boom sound and the narrartor saying 'Balls' whenever Isaac encounters "Keeper's Sack".
+
+Can be configured with [url=https://steamcommunity.com/sharedfiles/filedetails/?id=2681875787]Mod Config Menu[/url] to adjust when the sound plays and how loud it is.
+
+Thanks to [url=https://www.youtube.com/@lazymattman]Lazy Mattman[/url] for inspiration and [url=https://steamcommunity.com/sharedfiles/filedetails/?id=2491837386]BluePipe[/url] for sound effects.
+
+Issues? Report it [url=https://github.com/machasins/isaac_keeper_mod/issues]here[/url] or in the comments of this mod.</description>
+    <version>1.0</version>
+    <visibility>Private</visibility>
+    <tag id="Lua"/>
+    <tag id="Items"/>
+    <tag id="Tweaks"/>
+    <tag id="Sound Effects"/>
+</metadata>
