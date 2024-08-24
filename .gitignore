@@ -40,3 +40,5 @@ luac.out
 *.hex
 
 /.luarc.json
+disable.it
+.vscode/settings.json

@@ -20,36 +20,70 @@ mod.sfxQueue = {} -- The queue of sfx to be played
 mod.roomsSfxPlayed = {} -- Rooms the sfx has been played in
 mod.currentRoom = game:GetLevel():GetCurrentRoomDesc().SafeGridIndex -- The current room
 
+function mod:HandleQueueSFX(mega, volumeMod)
+    -- Get current time, in frames
+    local currentFrame = Isaac.GetFrameCount()
+    -- Queue the Vine Boom sfx
+    mod.sfxQueue[1] = { currentFrame + mod.sfxStartDelay,
+        function() sfx:Play(sfxVineBoom, mod.defaultVineBoomVolume * volumeMod, 2, false, 0.97, 0) end }
+    -- Queue the 'Balls' sfx depending on how many [Balls] there are
+    if mega then
+        -- More than one, play horse pills 'Balls'
+        mod.sfxQueue[2] = { currentFrame + mod.sfxStartDelay + mod.voicelineDelay,
+            function() sfx:Play(sfxBallsMega, mod.defaultBallsVolume * volumeMod, 2, false, 0.97, 0) end }
+    else
+        -- Only one, play normal 'Balls'
+        mod.sfxQueue[2] = { currentFrame + mod.sfxStartDelay + mod.voicelineDelay,
+            function() sfx:Play(sfxBalls, mod.defaultBallsVolume * volumeMod, 2, false, 0.97, 0) end }
+    end
+end
+
 ---Check for [Balls] within the room and play the sound if it's found
 function mod:CheckForSack()
     -- Config volume
     local volumeMod = (config.settings.volume) / 5
 
-    -- Check for [Balls] in the room
-    local items = Isaac.CountEntities(nil, EntityType.ENTITY_PICKUP, PickupVariant.PICKUP_COLLECTIBLE, BALLS_ID)
     -- How many [Balls] were in the room when last entered
     local previous = mod.roomsSfxPlayed[mod.currentRoom]
+    -- How many [Balls] are in the room currently
+    local items = 0
+
+    -- Handle Curse of the Blind
+    if config.settings.handleBlind and game:GetLevel():GetCurses() & LevelCurse.CURSE_OF_BLIND == LevelCurse.CURSE_OF_BLIND then
+        -- The number of [Balls] that have been picked up in the current room
+        items = previous or 0
+        -- Loop through all players and count how many are holding [Balls]
+        local numPlayer = game:GetNumPlayers()
+        for i = 0, numPlayer do
+            local player = game:GetPlayer(i)
+            local playerData = player:GetData()
+            local heldItem = player.QueuedItem.Item
+            if heldItem and heldItem.ID == BALLS_ID then
+                -- Only count if [Balls] hasn't already been counted
+                if not playerData.KBHasHeldItem then
+                    items = items + 1
+                    -- Mark this item as being counted
+                    playerData.KBHasHeldItem = true
+                end
+            else
+                -- Mark this player as not holding a valid item
+                playerData.KBHasHeldItem = false
+            end
+        end
+    else
+        -- Check for [Balls] in the room
+        items = Isaac.CountEntities(nil, EntityType.ENTITY_PICKUP, PickupVariant.PICKUP_COLLECTIBLE, BALLS_ID)
+    end
 
     -- Proceed if the room previously has no [Balls] but now has [Balls]
     -- OR if the number of [Balls] has increased since last entered
     if (previous == nil and items > 0) or (previous ~= nil and items > previous) then
         -- Keep track of new number of [Balls] in the room
         mod.roomsSfxPlayed[mod.currentRoom] = items
-        -- Get current time, in frames
-        local currentFrame = Isaac.GetFrameCount()
-        -- Queue the Vine Boom sfx
-        mod.sfxQueue[1] = { currentFrame + mod.sfxStartDelay,
-            function() sfx:Play(sfxVineBoom, mod.defaultVineBoomVolume * volumeMod, 2, false, 0.97, 0) end }
-        -- Queue the 'Balls' sfx depending on how many [Balls] there are
-        if items > 1 or (previous ~= nil and items > previous) then
-            -- More than one, play horse pills 'Balls'
-            mod.sfxQueue[2] = { currentFrame + mod.sfxStartDelay + mod.voicelineDelay,
-                function() sfx:Play(sfxBallsMega, mod.defaultBallsVolume * volumeMod, 2, false, 0.97, 0) end }
-        else
-            -- Only one, play normal 'Balls'
-            mod.sfxQueue[2] = { currentFrame + mod.sfxStartDelay + mod.voicelineDelay,
-                function() sfx:Play(sfxBalls, mod.defaultBallsVolume * volumeMod, 2, false, 0.97, 0) end }
-        end
+        -- Whether the SFX should be the mega version (if more than one [Balls] has been encountered in the room)
+        local doMega = items > 1 or (previous ~= nil and items > previous)
+        -- Play the sfx
+        mod:HandleQueueSFX(doMega, volumeMod)
     end
 
     -- Sub function to play the sounds after a period of time

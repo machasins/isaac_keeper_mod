@@ -1,8 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <metadata>
-	<name>Keeper's Sack Shoutout</name>
-	<directory>Keeper's Sack Shoutout</directory>
-	<description/>
-	<version>1.0</version>
-	<visibility/>
-</metadata>
+    <name>Keeper's Balls</name>
+    <directory>keepers balls</directory>
+    <id>3218982229</id>
+    <description># Keeper's Balls
+## A mod for The Binding of Isaac: Repentance, by machasins
 
+This mod simply plays a vine boom sound and the narrartor saying 'Balls' whenever Isaac encounters &quot;Keeper's Sack&quot;.
+
+Thanks to Lazy Mattman for inspiration and [BluePipe](https://steamcommunity.com/sharedfiles/filedetails/?id=2491837386) for sound effects.</description>
+    <version>1.3</version>
+    <visibility>Private</visibility>
+    <tag id="Lua"/>
+    <tag id="Items"/>
+    <tag id="Tweaks"/>
+    <tag id="Sound Effects"/>
+</metadata>

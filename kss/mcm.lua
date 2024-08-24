@@ -5,6 +5,7 @@ local mod = RegisterMod("Keeper's Balls MCM", 1)
 mod.name = "Keeper's Balls"
 mod.settings = {
     oncePerRoom = true,
+    handleBlind = true,
     volume = 5
 }
 
@@ -16,6 +17,17 @@ function mod:Load()
 
     local jsonString = mod:LoadData()
     mod.settings = json.decode(jsonString)
+    
+    local defaults = {
+        oncePerRoom = true,
+        handleBlind = true,
+        volume = 5
+    }
+    for key, value in pairs(defaults) do
+        if mod.settings[key] == nil then
+            mod.settings[key] = value
+        end
+    end
 end
 
 ---Save config data
@@ -66,6 +78,29 @@ function mod:ConfigMenuInit()
             Info = {
                 "Play the sound only the first time you enter a room with",
                 "Keeper's Sack (Off = Play every time you enter the room)"
+            }
+        }
+    )
+
+    -- Setting for respecting Curse of the Blind
+    ModConfigMenu.AddSetting(
+        mod.name,
+        nil,
+        {
+            Type = ModConfigMenu.OptionType.BOOLEAN,
+            CurrentSetting = function()
+                return mod.settings.handleBlind
+            end,
+            Display = function()
+                return "Respect Curse of the Blind: " .. (mod.settings.handleBlind and "on" or "off")
+            end,
+            OnChange = function (b)
+                mod.settings.handleBlind = b
+                mod:Save()
+            end,
+            Info = {
+                "Whether to respect Curse of the Blind and not play the sound",
+                "until picking up the item (Off = Play regardless)"
             }
         }
     )
