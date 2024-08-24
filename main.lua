@@ -86,6 +86,11 @@ function mod:CheckForSack()
         mod:HandleQueueSFX(doMega, volumeMod)
     end
 
+    -- Account for removing [Balls] and then re-adding it
+    if previous ~= nil and items < previous then
+        mod.roomsSfxPlayed[mod.currentRoom] = items
+    end
+
     -- Sub function to play the sounds after a period of time
     mod:PlaySFX()
 end
