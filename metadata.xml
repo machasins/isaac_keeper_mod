@@ -5,7 +5,7 @@
     <id>3218982229</id>
     <description>[img=https://i.imgur.com/t3mr8c7.png][/img]
 
-This mod simply plays a vine boom sound and the narrartor saying 'Balls' whenever Isaac encounters "Keeper's Sack".
+This mod simply plays a vine boom sound and the narrartor saying 'Balls' whenever Isaac encounters &quot;Keeper's Sack&quot;.
 
 Can be configured with [url=https://steamcommunity.com/sharedfiles/filedetails/?id=2681875787]Mod Config Menu[/url] to adjust when the sound plays and how loud it is.
 
@@ -20,8 +20,8 @@ I used [url=https://steamcommunity.com/sharedfiles/filedetails/?id=3034946842]Em
 
 
 This is truly a Mattman moment.</description>
-    <version>1.0</version>
-    <visibility>Private</visibility>
+    <version>1.1</version>
+    <visibility>Public</visibility>
     <tag id="Lua"/>
     <tag id="Items"/>
     <tag id="Tweaks"/>
