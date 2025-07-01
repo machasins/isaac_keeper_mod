@@ -16,8 +16,9 @@ mod.defaultVineBoomVolume = 1.75 -- Vine boom volume
 mod.defaultBallsVolume = 2.25 -- 'Balls' volume
 mod.sfxStartDelay = 0 -- Delay before vine boom should start
 mod.voicelineDelay = 50 -- Delay after vine boom to start 'Balls'
+mod.blindPickedUp = 0 -- How many have been picked up while blind
+mod.itemHasPlayed = {} -- Which items have played sound before
 mod.sfxQueue = {} -- The queue of sfx to be played
-mod.roomsSfxPlayed = {} -- Rooms the sfx has been played in
 mod.currentRoom = game:GetLevel():GetCurrentRoomDesc().SafeGridIndex -- The current room
 
 function mod:HandleQueueSFX(mega, volumeMod)
@@ -43,15 +44,15 @@ function mod:CheckForSack()
     -- Config volume
     local volumeMod = (config.settings.volume) / 5
 
-    -- How many [Balls] were in the room when last entered
-    local previous = mod.roomsSfxPlayed[mod.currentRoom]
-    -- How many [Balls] are in the room currently
-    local items = 0
+    -- Whether a sound should be played
+    local play = false
+    -- How many sounds have already been played
+    local havePlayed = 0
 
     -- Handle Curse of the Blind
-    if config.settings.handleBlind and game:GetLevel():GetCurses() & LevelCurse.CURSE_OF_BLIND == LevelCurse.CURSE_OF_BLIND then
+    if config.settings.handleBlind and (game:GetLevel():GetCurses() & LevelCurse.CURSE_OF_BLIND) == LevelCurse.CURSE_OF_BLIND then
         -- The number of [Balls] that have been picked up in the current room
-        items = previous or 0
+        havePlayed = mod.blindPickedUp
         -- Loop through all players and count how many are holding [Balls]
         local numPlayer = game:GetNumPlayers()
         for i = 0, numPlayer do
@@ -61,7 +62,8 @@ function mod:CheckForSack()
             if heldItem and heldItem.ID == BALLS_ID then
                 -- Only count if [Balls] hasn't already been counted
                 if not playerData.KBHasHeldItem then
-                    items = items + 1
+                    play = true
+                    mod.blindPickedUp = mod.blindPickedUp + 1
                     -- Mark this item as being counted
                     playerData.KBHasHeldItem = true
                 end
@@ -71,24 +73,24 @@ function mod:CheckForSack()
             end
         end
     else
-        -- Check for [Balls] in the room
-        items = Isaac.CountEntities(nil, EntityType.ENTITY_PICKUP, PickupVariant.PICKUP_COLLECTIBLE, BALLS_ID)
+        for _, item in pairs(Isaac.FindByType(EntityType.ENTITY_PICKUP, PickupVariant.PICKUP_COLLECTIBLE)) do
+            if item.SubType == BALLS_ID then
+                if mod.itemHasPlayed[item.InitSeed] == true then
+                    havePlayed = havePlayed + 1
+                else
+                    play = true
+                    mod.itemHasPlayed[item.InitSeed] = true
+                end
+            elseif mod.itemHasPlayed[item.InitSeed] == true then
+                havePlayed = havePlayed + 1
+            end
+        end
     end
 
-    -- Proceed if the room previously has no [Balls] but now has [Balls]
-    -- OR if the number of [Balls] has increased since last entered
-    if (previous == nil and items > 0) or (previous ~= nil and items > previous) then
-        -- Keep track of new number of [Balls] in the room
-        mod.roomsSfxPlayed[mod.currentRoom] = items
-        -- Whether the SFX should be the mega version (if more than one [Balls] has been encountered in the room)
-        local doMega = items > 1 or (previous ~= nil and items > previous)
+    -- Play the sound if needed
+    if play then
         -- Play the sfx
-        mod:HandleQueueSFX(doMega, volumeMod)
-    end
-
-    -- Account for removing [Balls] and then re-adding it
-    if previous ~= nil and items < previous then
-        mod.roomsSfxPlayed[mod.currentRoom] = items
+        mod:HandleQueueSFX(havePlayed > 0, volumeMod)
     end
 
     -- Sub function to play the sounds after a period of time
@@ -116,17 +118,16 @@ function mod:OnNewRoom()
     -- Config for playing every time you enter a room
     if not config.settings.oncePerRoom then
         -- If config not set, disregard what was in the previous room
-        mod.roomsSfxPlayed[mod.currentRoom] = nil
+        mod.itemHasPlayed = {}
     end
-    -- Get the new room number
-    mod.currentRoom = game:GetLevel():GetCurrentRoomDesc().SafeGridIndex
 end
 
 ---Clear any room data from a previous floor
 function mod:OnNewLevel()
-    mod.roomsSfxPlayed = {}
+    mod.itemHasPlayed = {}
+    mod.blindPickedUp = 0
 end
 
-mod:AddCallback(ModCallbacks.MC_POST_RENDER, mod.CheckForSack)
+mod:AddCallback(ModCallbacks.MC_POST_UPDATE, mod.CheckForSack)
 mod:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, mod.OnNewRoom)
 mod:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, mod.OnNewLevel)
